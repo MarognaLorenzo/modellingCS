@@ -1,10 +1,12 @@
 from http.server import SimpleHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse, parse_qs
+from io import BytesIO
 import os
 import subprocess
 import json
 import shutil
 import platform
+import zipfile
 
 class SetHandler(SimpleHTTPRequestHandler):
 
@@ -36,7 +38,8 @@ class SetHandler(SimpleHTTPRequestHandler):
             "/is_set" : self.handle_is_set,
             "/show_sets" : self.handle_show_sets,
             "/are_there_sets" : self.handle_are_there_sets,
-            "/ltc_progress" : self.handle_ltc_progress
+            "/ltc_progress" : self.handle_ltc_progress,
+            "/download" : self.send_zip_file
         }
 
         # Serve the pages
@@ -249,6 +252,36 @@ class SetHandler(SimpleHTTPRequestHandler):
 
         response = f'{{"value": "{value}", "msg": "{retrun_val}"}}'
         self.wfile.write(response.encode())
+
+    def send_zip_file(self, query_params):
+        part = query_params.get("part", ["one"])[0]
+        zip_name = query_params.get("zipname", ["files.zip"])[0]
+
+        file_names = []
+        # Convert CSV list of files into an array
+        if part == "part":
+            file_names = ["./idp/set1/base-theory.idp", "./idp/set1/selected-theory.idp", "./idp/set1/table-theory.idp"]
+        else:
+            # TO DO: add files for the part 2
+            file_names = []
+
+        zip_buffer = BytesIO()
+
+        # Create a ZIP file in memory
+        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            for file in file_names:
+                if os.path.exists(file):
+                    zipf.write(file, os.path.basename(file))
+
+        # Prepare the response
+        self.send_response(200)
+        self.send_header("Content-type", "application/zip")
+        self.send_header("Content-Disposition", f"attachment; filename={zip_name}")
+        self.end_headers()
+
+        # Write zip content to response
+        zip_buffer.seek(0)
+        self.wfile.write(zip_buffer.read())
 
 # Search for idp binaries
 def find_idp():

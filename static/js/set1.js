@@ -181,3 +181,18 @@ reset();
 window.addEventListener('resize', handleResize);
 handleResize();
 
+// Bind the download link
+elID("download").onclick = async (event) => {
+    event.preventDefault(); // Prevent the default link action
+
+    let userInput = prompt("You can use the downloaded file for submission. Make sure to enter your correct r/s/u number (with the starting letter):");
+    if (userInput) {
+        // Ensure the filename is safe (remove special characters)
+        userInput = userInput.replace(/[^a-zA-Z0-9_\-]/g, "_");
+
+        // Redirect to the download link with the new name
+        window.location.href = `./download?zipname=${encodeURIComponent(userInput)}.zip`;
+    } else {
+        alert("Download canceled: No number entered.");
+    }
+}
