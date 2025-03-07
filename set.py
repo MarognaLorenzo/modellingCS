@@ -1,0 +1,301 @@
+from http.server import SimpleHTTPRequestHandler, HTTPServer
+from urllib.parse import urlparse, parse_qs
+import os
+import subprocess
+import json
+import shutil
+import platform
+
+class SetHandler(SimpleHTTPRequestHandler):
+
+    def __init__(self, command=None, *args, **kwargs):
+        self.idp_command = command
+        if(self.idp_command):
+            print(f"Handler initialized with command: {self.idp_command}")
+        else:
+            print(f"Looks like 'idp' command was not found! Please make 'idp' command on the path or provide a custom path in the config file, and restart the app!")
+        super().__init__(*args, **kwargs)
+
+    def do_GET(self):
+
+        # Parse the URL and query parameters
+        parsed_url = urlparse(self.path)
+        query_params = parse_qs(parsed_url.query)
+
+        pages = {
+            "/" : "menu",
+            "/assignment" : "assignment",
+            "/help" : "help", 
+            "/set1" : "set1",  
+            "/set2" : "set2"
+        }
+
+        requests = {
+            "/get_code" : self.handle_get_code,
+            "/save_code" : self.handle_save_code,
+            "/is_set" : self.handle_is_set,
+            "/show_sets" : self.handle_show_sets,
+            "/are_there_sets" : self.handle_are_there_sets,
+            "/ltc_progress" : self.handle_ltc_progress
+        }
+
+        # Serve the pages
+        file_to_serve = pages.get(parsed_url.path)
+        function_to_run = requests.get(parsed_url.path)
+
+        if file_to_serve:
+            # If no idp command
+            if(self.idp_command == ""):
+                self.serve_page("idperror")
+            else:
+                self.serve_page(file_to_serve)
+        elif function_to_run:
+            # If no idp command
+            if(self.idp_command == ""):
+                self.serve_page("idperror")
+            else:
+                function_to_run(query_params)
+        else:
+            super().do_GET()
+        
+    # Index server
+    def serve_page(self, title):
+        # Serve the html file from the current directory
+        self.send_response(200)
+        self.send_header("Content-type", "text/html")
+        self.end_headers()
+        
+        # Read the contents of html
+        try:
+            with open("./pages/" + title + ".html", "rb") as file:
+                self.wfile.write(file.read())
+        except FileNotFoundError:
+            self.wfile.write(b"<html><body><h1>404 - File Not Found</h1></body></html>")
+
+    def handle_get_code(self, query_params):
+        name = query_params.get("name", [""])[0]
+        try:
+            with open(f"./idp/{name}.idp", "rb") as file:
+                code = file.read()
+                code_str = code.decode('utf-8')
+
+                self.send_response(200)
+                self.send_header("Content-type", "application/json")
+                self.end_headers()
+
+                response = json.dumps({"code": code_str})
+                self.wfile.write(response.encode())
+
+        except FileNotFoundError:
+            self.wfile.write(b"<html><body><h1>404 - File Not Found</h1></body></html>")
+
+    def handle_save_code(self, query_params):
+        name = query_params.get("name", [""])[0]
+        code = query_params.get("code", [""])[0]
+
+        try:
+            with open(f"./idp/{name}.idp", "w") as file:
+                file.write(code)
+
+                self.send_response(200)
+                self.send_header("Content-type", "application/json")
+                self.end_headers()
+                self.wfile.write(b"File saved!")
+
+        except FileNotFoundError:
+            self.wfile.write(b"<html><body><h1>404 - File Not Found</h1></body></html>")
+
+    # is_set handler
+    def handle_is_set(self, query_params):
+        """Handle the /is_set endpoint with optional query parameters."""
+        structure = query_params.get("structure", [""])[0]  # Get 'structure' parameter (default empty string)
+        
+        with open("./idp/set1/selected-instance.idp", "w") as file:
+            file.write(structure)
+
+        value = ""
+        retrun_val = ""
+
+        try:
+            result = subprocess.run([self.idp_command, "-e", "checkIfSet()", "--nowarnings", "./idp/set1/set.idp"], capture_output=True, text=True, check=True)
+
+            output = result.stdout.strip()
+
+            # Check if the output contains "true" or "false"
+            if "true" in output.lower():
+                value = "true"
+                retrun_val = "Your theory: This is a set!"
+            elif "false" in output.lower():
+                value = "false"
+                retrun_val = "Your theory: This is not a set!"
+            else:
+                value = "unknown"
+                retrun_val = "Unknown output!"
+
+        except subprocess.CalledProcessError as e:
+            value = "error"
+            retrun_val = e.stderr.replace('"', '\\"').replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t")
+
+        self.send_response(200)
+        self.send_header("Content-type", "application/json")
+        self.end_headers()
+
+        response = f'{{"value": "{value}", "msg": "{retrun_val}"}}'
+        self.wfile.write(response.encode())
+
+    # is_set handler
+    def handle_show_sets(self, query_params):
+        """Handle the /is_set endpoint with optional query parameters."""
+        structure = query_params.get("structure", [""])[0]  # Get 'structure' parameter (default empty string)
+        
+        with open("./idp/set1/table-instance.idp", "w") as file:
+            file.write(structure)
+
+        value = ""
+        retrun_val = ""
+
+        try:
+            result = subprocess.run([self.idp_command, "-e", "findSetsOnTable()", "--nowarnings", "./idp/set1/set.idp"], capture_output=True, text=True, check=True)
+            output = result.stdout.strip()
+
+            if "unsatisfiable" in output.lower():
+                value = "unsatisfiable"
+                retrun_val = ""
+            else:
+                value = "success"
+                retrun_val = output.replace('"', '\\"').replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t")
+
+        except subprocess.CalledProcessError as e:
+            value = "error"
+            retrun_val = e.stderr.replace('"', '\\"').replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t")
+
+        self.send_response(200)
+        self.send_header("Content-type", "application/json")
+        self.end_headers()
+
+        response = f'{{"value": "{value}", "msg": "{retrun_val}"}}'
+        self.wfile.write(response.encode())
+
+    def handle_are_there_sets(self, query_params):
+        """Handle the /is_set endpoint with optional query parameters."""
+        structure = query_params.get("structure", [""])[0]  # Get 'structure' parameter (default empty string)
+        
+        with open("./idp/set1/table-instance.idp", "w") as file:
+            file.write(structure)
+
+        value = ""
+        retrun_val = ""
+
+        try:
+            result = subprocess.run([self.idp_command, "-e", "areThereSetsOnTheTable()", "--nowarnings", "./idp/set1/set.idp"], capture_output=True, text=True, check=True)
+
+            output = result.stdout.strip()
+
+            # Check if the output contains "true" or "false"
+            if "true" in output.lower():
+                value = "true"
+                retrun_val = "Your theory: This is a set!"
+            elif "false" in output.lower():
+                value = "false"
+                retrun_val = "Your theory: This is not a set!"
+            else:
+                value = "unknown"
+                retrun_val = "Unknown output!"
+
+        except subprocess.CalledProcessError as e:
+            value = "error"
+            retrun_val = e.stderr.replace('"', '\\"').replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t")
+
+        self.send_response(200)
+        self.send_header("Content-type", "application/json")
+        self.end_headers()
+
+        response = f'{{"value": "{value}", "msg": "{retrun_val}"}}'
+        self.wfile.write(response.encode())
+
+
+    def handle_ltc_progress(self, query_params):
+        """Handle the /is_set endpoint with optional query parameters."""
+        structure = query_params.get("structure", [""])[0]
+        inference = query_params.get("inference", [""])[0]
+        
+        with open("./idp/set2/structure.idp", "w") as file:
+            file.write(structure)
+
+        value = ""
+        retrun_val = ""
+
+        try:
+            subprocess.run([self.idp_command, "-e", "writeTheHelpVoc()", "--nowarnings", "./vocabulary-util.idp"], cwd="./idp/set2", capture_output=True, text=True, check=True)
+
+            result = subprocess.run([self.idp_command, "-e", inference+"()", "--nowarnings", "./idp/set2/set.idp"], capture_output=True, text=True, check=True)
+
+            output = result.stdout.strip()
+
+            if "unsatisfiable" in output.lower():
+                value = "unsatisfiable"
+                retrun_val = ""
+            else:
+                value = "success"
+                retrun_val = output.replace('"', '\\"').replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t")
+
+        except subprocess.CalledProcessError as e:
+            value = "error"
+            retrun_val = e.stderr.replace('"', '\\"').replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t")
+
+        self.send_response(200)
+        self.send_header("Content-type", "application/json")
+        self.end_headers()
+
+        response = f'{{"value": "{value}", "msg": "{retrun_val}"}}'
+        self.wfile.write(response.encode())
+
+# Search for idp binaries
+def find_idp():
+    print("Searching for IDP!")
+
+    # Load from file
+    with open("config.json", "r") as f:
+        loaded_data = json.load(f)
+
+    if loaded_data["idp_path"]:
+        print("Checing command from the config: (" + loaded_data["idp_path"] + ")")
+        if shutil.which(loaded_data["idp_path"]):
+            
+            return loaded_data["idp_path"]
+    
+    """Check if any of the OS-specific commands exist and return the first one found."""
+    commands = {
+        "Windows": ["wls idp", "idp"],
+        "Linux": ["idp", "/opt/idp3/resources/app/idp3/bin/idp", "/usr/local/bin/idp"],
+        "Darwin": ["idp", "/Applications/idp3-ide.app/Contents/Resources/app/idp3/bin/idp"]
+    }
+
+    system = platform.system()
+    possible_commands = commands.get(system, [])
+
+    for cmd in possible_commands:
+        print("Checing command from the preset commands: (" + cmd + ")")
+        if shutil.which(cmd): 
+            return cmd 
+
+    return "" 
+
+# Factory function to inject parameters
+def handler_factory(custom_param):
+    return lambda *args, **kwargs: SetHandler(custom_param, *args, **kwargs)
+
+if __name__ == "__main__":
+    # Define server address and port
+    host = "localhost"
+    port = 8000
+
+    # Set up server
+    server_address = (host, port)
+    httpd = HTTPServer(server_address, handler_factory(find_idp()))
+
+    print(f"Serving HTTP on {host}:{port}")
+    httpd.serve_forever()
+
+
+

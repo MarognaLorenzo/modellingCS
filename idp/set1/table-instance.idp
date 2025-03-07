@@ -1,0 +1,7 @@
+structure S_table : V_table_extra {
+  table = {
+    c("Two","Diamond","Stripes","Blue"); c("Two","Squiggle","Full","Green"); c("One","Squiggle","Empty","Red");
+    c("Two","Diamond","Full","Red"); c("One","Squiggle","Empty","Green"); c("Three","Squiggle","Stripes","Blue");
+    c("Three","Diamond","Full","Green"); c("Two","Squiggle","Stripes","Blue"); c("Two","Oval","Stripes","Green");
+  }
+}
