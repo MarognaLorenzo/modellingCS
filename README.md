@@ -4,7 +4,7 @@
 2) The application will try to find `idp` binaries, and if it fails, provide the command or path in the `config.json` file.
 
 
-## COnfiguration
+## Configuration
 
 By default, the app should work out of the box (if you have IDP installed on your system).
 The `config.json` file allows you to specify a custom path to the IDP binaries, change the timeout limit (for executing IDP) and to change the port of the app if needed.
