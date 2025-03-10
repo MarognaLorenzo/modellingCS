@@ -115,14 +115,14 @@ class MSG{
         }else if (data.value == "unsatisfiable") {
             this.setTheConsole();
             this.pushMsg(this.generateMsgBox('#E16A54',[{color : '#E16A54', msg : 'Your theory seams to be unsatisfiable, which shuld never be the case!'}]));
-        }else if (data.value == "error") {
+        }else if (data.value == "error" || data.value == "timeout") {
             this.setTheConsole(data.msg, true);
         }
     }
 
     // Handl the Are There Sets response
     generateAndPushMsgForAreThereSets(data){
-        if(data.value == "error"){
+        if(data.value == "error" || data.value == "timeout"){
             this.setTheConsole(data.msg, true);
         }else{
             this.setTheConsole();
@@ -134,7 +134,7 @@ class MSG{
 
     // Handl the Check If Set response
     generateAndPushMsgForCheckIfSet(data, isSetProc, selectedCards, deck){
-        if(data.value == "error"){
+        if(data.value == "error" || data.value == "timeout"){
             this.setTheConsole(data.msg, true);
         }else{
             let isSetDecl = (data.value === "true");

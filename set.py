@@ -10,8 +10,9 @@ import zipfile
 
 class SetHandler(SimpleHTTPRequestHandler):
 
-    def __init__(self, command=None, *args, **kwargs):
+    def __init__(self, command=None, timeout=20, *args, **kwargs):
         self.idp_command = command
+        self.timeout_limit = timeout
         if(self.idp_command):
             print(f"Handler initialized with command: {self.idp_command}")
         else:
@@ -120,7 +121,7 @@ class SetHandler(SimpleHTTPRequestHandler):
         retrun_val = ""
 
         try:
-            result = subprocess.run([self.idp_command, "-e", "checkIfSet()", "--nowarnings", "./idp/set1/set.idp"], capture_output=True, text=True, check=True)
+            result = subprocess.run([self.idp_command, "-e", "checkIfSet()", "--nowarnings", "./idp/set1/set.idp"], capture_output=True, text=True, check=True, timeout=self.timeout_limit)
 
             output = result.stdout.strip()
 
@@ -134,6 +135,10 @@ class SetHandler(SimpleHTTPRequestHandler):
             else:
                 value = "unknown"
                 retrun_val = "Unknown output!"
+
+        except subprocess.TimeoutExpired:
+            value = "timeout"
+            retrun_val = "IDP timeout! You can change the timeout limit in the config file. Note that it should not exceed 1 minute!"
 
         except subprocess.CalledProcessError as e:
             value = "error"
@@ -158,7 +163,7 @@ class SetHandler(SimpleHTTPRequestHandler):
         retrun_val = ""
 
         try:
-            result = subprocess.run([self.idp_command, "-e", "findSetsOnTable()", "--nowarnings", "./idp/set1/set.idp"], capture_output=True, text=True, check=True)
+            result = subprocess.run([self.idp_command, "-e", "findSetsOnTable()", "--nowarnings", "./idp/set1/set.idp"], capture_output=True, text=True, check=True, timeout=self.timeout_limit)
             output = result.stdout.strip()
 
             if "unsatisfiable" in output.lower():
@@ -167,6 +172,10 @@ class SetHandler(SimpleHTTPRequestHandler):
             else:
                 value = "success"
                 retrun_val = output.replace('"', '\\"').replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t")
+
+        except subprocess.TimeoutExpired:
+            value = "timeout"
+            retrun_val = "IDP timeout! You can change the timeout limit in the config file. Note that it should not exceed 1 minute!"
 
         except subprocess.CalledProcessError as e:
             value = "error"
@@ -190,7 +199,7 @@ class SetHandler(SimpleHTTPRequestHandler):
         retrun_val = ""
 
         try:
-            result = subprocess.run([self.idp_command, "-e", "areThereSetsOnTheTable()", "--nowarnings", "./idp/set1/set.idp"], capture_output=True, text=True, check=True)
+            result = subprocess.run([self.idp_command, "-e", "areThereSetsOnTheTable()", "--nowarnings", "./idp/set1/set.idp"], capture_output=True, text=True, check=True, timeout=self.timeout_limit)
 
             output = result.stdout.strip()
 
@@ -204,6 +213,10 @@ class SetHandler(SimpleHTTPRequestHandler):
             else:
                 value = "unknown"
                 retrun_val = "Unknown output!"
+
+        except subprocess.TimeoutExpired:
+            value = "timeout"
+            retrun_val = "IDP timeout! You can change the timeout limit in the config file. Note that it should not exceed 1 minute!"
 
         except subprocess.CalledProcessError as e:
             value = "error"
@@ -314,18 +327,49 @@ def find_idp():
 
     return "" 
 
+# Get timeout limit
+def get_timeout():
+    print("Searching config for timeout limit!")
+
+    # Load from file
+    with open("config.json", "r") as f:
+        loaded_data = json.load(f)
+
+    if loaded_data["timeout"]:
+        print("Timeout set by config to: " + str(loaded_data["timeout"]) + "(s).")
+        return loaded_data["timeout"]
+    else: 
+        print("Timeout set to default value: 20(s).")
+        return 20
+
+# Get the port
+def get_port():
+    print("Searching config for port!")
+
+    # Load from file
+    with open("config.json", "r") as f:
+        loaded_data = json.load(f)
+
+    if loaded_data["port"]:
+        print("Port set by config to: " + str(loaded_data["port"]))
+        return loaded_data["port"]
+    else: 
+        print("Port set to default value: 8000.")
+        return 8000
+
+
 # Factory function to inject parameters
-def handler_factory(custom_param):
-    return lambda *args, **kwargs: SetHandler(custom_param, *args, **kwargs)
+def handler_factory(idp_path, timeout):
+    return lambda *args, **kwargs: SetHandler(idp_path, timeout, *args, **kwargs)
 
 if __name__ == "__main__":
     # Define server address and port
     host = "localhost"
-    port = 8000
+    port = get_port()
 
     # Set up server
     server_address = (host, port)
-    httpd = HTTPServer(server_address, handler_factory(find_idp()))
+    httpd = HTTPServer(server_address, handler_factory(find_idp(), get_timeout()))
 
     print(f"Serving HTTP on {host}:{port}")
     httpd.serve_forever()

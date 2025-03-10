@@ -9,4 +9,4 @@ If you find a bug, please open an issue on the [GitLab issue page](https://gitla
 If you are not sure about creating an issue, you can send an email to [Djordje Markovic](mailto:dorde.markovic@kuleuven.be).
 
 
-
+In case you have any doubts or questions regarding the project assignment, please send an email to all teaching assistants.
