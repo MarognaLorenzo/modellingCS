@@ -306,13 +306,20 @@ def find_idp():
 
     if loaded_data["idp_path"]:
         print("Checing command from the config: (" + loaded_data["idp_path"] + ")")
-        if shutil.which(loaded_data["idp_path"]):
-            
-            return loaded_data["idp_path"]
+        try:
+            result = subprocess.run([loaded_data["idp_path"], "-h"], capture_output=True, text=True, check=True)
+            output = result.stdout.strip()
+
+            if "idp [options] [filename [filename [...]]]" in output.lower():
+                print(f"Command '{loaded_data["idp_path"]}' is valid.")
+                return loaded_data["idp_path"] 
+        except subprocess.CalledProcessError:
+            print(f"Command '{loaded_data["idp_path"]}' failed to execute.")
+
     
     """Check if any of the OS-specific commands exist and return the first one found."""
     commands = {
-        "Windows": ["wls idp", "idp"],
+        "Windows": ["wsl idp", "idp"],
         "Linux": ["idp", "/opt/idp3/resources/app/idp3/bin/idp", "/usr/local/bin/idp"],
         "Darwin": ["idp", "/Applications/idp3-ide.app/Contents/Resources/app/idp3/bin/idp"]
     }
@@ -322,8 +329,15 @@ def find_idp():
 
     for cmd in possible_commands:
         print("Checing command from the preset commands: (" + cmd + ")")
-        if shutil.which(cmd): 
-            return cmd 
+        try:
+            result = subprocess.run([cmd, "-h"], capture_output=True, text=True, check=True)
+            output = result.stdout.strip()
+
+            if "idp [options] [filename [filename [...]]]" in output.lower():
+                print(f"Command '{cmd}' is valid.")
+                return cmd 
+        except subprocess.CalledProcessError:
+            print(f"Command '{cmd}' failed to execute.")
 
     return "" 
 
