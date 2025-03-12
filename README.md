@@ -31,21 +31,18 @@ The `config.json` file allows you to specify:
 
 ## Updating the project
 
-In case there are some changes made by teaching assistants, you will need to get them by the `git pull` command (this can happen in case of bug fixes or other improvements).
+In case there are some changes of the source code of the project made by teaching assistants, you will need to get them (this can happen in case of bug fixes or other improvements).
 We will announce these changes in Toledo.
 
-To do the `git pull` you will first have to save changes you made (i.e., your solution of the project). 
-You can do this either by committing your changes or stashing them.
-To commit the changes run first `git add .` and then `git commit -m "Saving changes"`.
+To fetch the changes you can do the following:
+1) Download your current solution as a backup (in case something goes wrong).
+2) Stash your changes with the command `git stash`.
+3) Fetch the update by running `git pull`.
+4) Restore your changes with the command  `git stash pop`.
 
-In case we updated some of the template files (idp files that students can edit), after pooling, you will get a conflict, you can resolve it by removing all the meta tags and keeping both updates and your version.  
-
-Note that you will never need to push your changes.  
 Note, all of these commands should be done in the root directory of the project.
 
-If you are not familiar with the git, please refer to these pages for some help: 
-- [Git clone](https://git-scm.com/docs/git-clone)
-- [Git pull](https://git-scm.com/docs/git-pull)
+If you are not familiar with the git, please refer to [documentation pages](https://git-scm.com/doc) for some help.
 
 ## Using IDP-IDE (optional)
 
