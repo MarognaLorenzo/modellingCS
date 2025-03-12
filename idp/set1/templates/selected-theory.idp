@@ -1,4 +1,4 @@
-// DO NOT EDIT this vocabulary
+// DO NOT EDIT vocabulary "V_selected"
 vocabulary V_selected {
 	extern vocabulary V_base_extended
     
