@@ -98,7 +98,7 @@
             <br>
             <p class="description">
                 As a this year (2025) project assignment for the course MCS we will model the card game named "Set".
-                This is a turnebase multiplayer game with a custom deck, and hence suitable to represent as a linear temporal system.
+                This is a turn-based multiplayer game with a custom deck, and hence suitable to represent as a linear temporal system.
                 Following are the explanations of cards, how they form a "set", and game rules used for this project.
             </p>
             
@@ -106,7 +106,7 @@
             <p class="description">
                 <b>Cards</b> in this game are described by four properties (Number, Color, Shade, Shape).
                 Each of the properties has three possible values: Number is either 1, 2, or 3; Color is either Red, Green, or Orange; Shade is either Empty, Stripes, or Full; Shape is either Diamond, Squiggle, or Oval.
-                These properties are describibg how many and what kind of objects can be found on the card.
+                These properties describe how many and what kind of objects can be found on the card.
             </p>
             <p class="description">
                 For example, the following card contains <b><span id="card-info">One Oval Full Red</span></b> object(s). <button class="btn-small" id="randomCard">Generate new</button> 
@@ -120,7 +120,7 @@
                 Three cards form a <b>set</b> (of cards) if for each property either:
                 <ul>
                     <li>All three have the same value for that property.</li>
-                    <li>All three have distinct value for that property.</li>
+                    <li>All three have distinct values for that property.</li>
                 </ul>
             </p>
             <p class="description">
@@ -145,17 +145,17 @@
                 For this project, we proceed with the following variation of the <b>game rules</b>:
                 <ul>
                     <li>There are n players (n > 1).</li>
-                    <li>Initially score of each player is zero.</li>
+                    <li>Initially, the score of each player is zero.</li>
                     <li>Initially there are nine cards at the card table.</li>
                     <li>Players take turns one by one in a circular manner.</li>
                     <li>When on a turn, the player has two options.</li>
                     <ol>
                         <li>Guess if something is a set.</li>
-                        <li>Clame there are no sets at the card table.</li>
+                        <li>Claim there are no sets at the card table.</li>
                     </ol>
-                    <li>If the player guessed correctly a set their score gets increased by 3 points plus 1 point for each player in a chain immediately before them that claimed there is no set at the table (this resets if cards are added to the table).</li>
-                    <li>If a player guessed wrongly, their score get reduced by 1 point.</li>
-                    <li>If all n players consecutively claim that there is no set at the table, the player that is next on the move (the one that claimed first) deals three cards to the table and stays on turn (to guess or clame no set).</li>
+                    <li>If the player guessed correctly, their score gets increased by 3 points plus 1 point for each player in a chain immediately before them that claimed there is no set at the table (this resets if cards are added to the table).</li>
+                    <li>If a player guessed wrongly, their score gets reduced by 1 point.</li>
+                    <li>If all n players consecutively claim that there is no set at the table, the player that is next on the move (the one that claimed first) deals three cards to the table and stays on turn (to guess or claim no set).</li>
                     <li>The game is over when there are no more cards to deal with, and the loop of n players claims there is no set at the table.</li>
                     <li>The winner is the player with the biggest score.</li>
                     <li>The tiebreaker is the last set guessed (who is the last to guess the set, they win).</li>
