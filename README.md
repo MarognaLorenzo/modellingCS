@@ -29,6 +29,24 @@ The `config.json` file allows you to specify:
 - The timeout limit for executing IDP (the default value 20 seconds).
 - The port of the web application (the default value is 8000).
 
+## Updating the project
+
+In case there are some changes made by teaching assistants, you will need to get them by the `git pull` command (this can happen in case of bug fixes or other improvements).
+We will announce these changes in Toledo.
+
+To do the `git pull` you will first have to save changes you made (i.e., your solution of the project). 
+You can do this either by committing your changes or stashing them.
+To commit the changes run first `git add .` and then `git commit -m "Saving changes"`.
+
+In case we updated some of the template files (idp files that students can edit), after pooling, you will get a conflict, you can resolve it by removing all the meta tags and keeping both updates and your version.  
+
+Note that you will never need to push your changes.  
+Note, all of these commands should be done in the root directory of the project.
+
+If you are not familiar with the git, please refer to these pages for some help: 
+- [Git clone](https://git-scm.com/docs/git-clone)
+- [Git pull](https://git-scm.com/docs/git-pull)
+
 ## Using IDP-IDE (optional)
 
 In case you would like to use IDP-IDE to edit your files, you can set the workspace to `./idp/set1/` (here `.` stands for the root of the project). Make sure not to edit files in the `template` directory.
