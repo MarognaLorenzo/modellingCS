@@ -42,6 +42,25 @@ To fetch the changes you can do the following:
 
 Note, all of these commands should be done in the root directory of the project.
 
+### Conflicts
+
+In case we updated some of the idp files that are part of your solution, it is possible that you would get a conflict when doing `git stash pop`.
+To resolve the conflict, open the conflicted file and remove the meta lines, for example, the following conflict:
+```
+ <<<<<<< Updated upstream
+ The update ...
+ =======
+ Code from your stash ...
+ >>>>>>> Stashed changes
+```
+Should be resolved as:
+```
+ The update ...
+ Code from your stash ...
+```
+
+Finally run `git add .` to add these changes and `git stash clear` to clear the stash.
+
 If you are not familiar with the git, please refer to [documentation pages](https://git-scm.com/doc) for some help.
 
 ## Using IDP-IDE (optional)
