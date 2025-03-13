@@ -7,6 +7,7 @@ import json
 import shutil
 import platform
 import zipfile
+import shlex
 
 class SetHandler(SimpleHTTPRequestHandler):
 
@@ -121,7 +122,9 @@ class SetHandler(SimpleHTTPRequestHandler):
         retrun_val = ""
 
         try:
-            result = subprocess.run([self.idp_command, "-e", "checkIfSet()", "--nowarnings", "./idp/set1/set.idp"], capture_output=True, text=True, check=True, timeout=self.timeout_limit)
+            cmd_list = shlex.split(self.idp_command)
+            cmd_list.extend(["-e", "checkIfSet()", "--nowarnings", "./idp/set1/set.idp"])
+            result = subprocess.run(cmd_list, capture_output=True, text=True, check=True, timeout=self.timeout_limit)
 
             output = result.stdout.strip()
 
@@ -163,7 +166,9 @@ class SetHandler(SimpleHTTPRequestHandler):
         retrun_val = ""
 
         try:
-            result = subprocess.run([self.idp_command, "-e", "findSetsOnTable()", "--nowarnings", "./idp/set1/set.idp"], capture_output=True, text=True, check=True, timeout=self.timeout_limit)
+            cmd_list = shlex.split(self.idp_command)
+            cmd_list.extend(["-e", "findSetsOnTable()", "--nowarnings", "./idp/set1/set.idp"])
+            result = subprocess.run(cmd_list, capture_output=True, text=True, check=True, timeout=self.timeout_limit)
             output = result.stdout.strip()
 
             if "unsatisfiable" in output.lower():
@@ -199,7 +204,9 @@ class SetHandler(SimpleHTTPRequestHandler):
         retrun_val = ""
 
         try:
-            result = subprocess.run([self.idp_command, "-e", "areThereSetsOnTheTable()", "--nowarnings", "./idp/set1/set.idp"], capture_output=True, text=True, check=True, timeout=self.timeout_limit)
+            cmd_list = shlex.split(self.idp_command)
+            cmd_list.extend(["-e", "areThereSetsOnTheTable()", "--nowarnings", "./idp/set1/set.idp"])
+            result = subprocess.run(cmd_list, capture_output=True, text=True, check=True, timeout=self.timeout_limit)
 
             output = result.stdout.strip()
 
@@ -242,9 +249,13 @@ class SetHandler(SimpleHTTPRequestHandler):
         retrun_val = ""
 
         try:
-            subprocess.run([self.idp_command, "-e", "writeTheHelpVoc()", "--nowarnings", "./vocabulary-util.idp"], cwd="./idp/set2", capture_output=True, text=True, check=True)
+            cmd_list = shlex.split(self.idp_command)
+            cmd_list.extend(["-e", "writeTheHelpVoc()", "--nowarnings", "./vocabulary-util.idp"])
+            subprocess.run(cmd_list, cwd="./idp/set2", capture_output=True, text=True, check=True)
 
-            result = subprocess.run([self.idp_command, "-e", inference+"()", "--nowarnings", "./idp/set2/set.idp"], capture_output=True, text=True, check=True)
+            cmd_list = shlex.split(self.idp_command)
+            cmd_list.extend(["-e", inference+"()", "--nowarnings", "./idp/set2/set.idp"])
+            result = subprocess.run(cmd_list, capture_output=True, text=True, check=True)
 
             output = result.stdout.strip()
 
@@ -299,38 +310,28 @@ class SetHandler(SimpleHTTPRequestHandler):
 # Search for idp binaries
 def find_idp():
     print("Searching for IDP!")
+    commands = {
+        "Windows": ["wsl idp", "idp"],
+        "Linux": ["idp", "/opt/idp3/resources/app/idp3/bin/idp", "/usr/local/bin/idp", "/export/home1/localhost/packages/IDP3-IDE/v0.3.4/resources/app/idp3/bin/idp"],
+        "Darwin": ["idp", "/Applications/idp3-ide.app/Contents/Resources/app/idp3/bin/idp"]
+    }
 
     # Load from file
     with open("config.json", "r") as f:
         loaded_data = json.load(f)
 
-    if loaded_data["idp_path"]:
-        print("Checing command from the config: (" + loaded_data["idp_path"] + ")")
-        try:
-            result = subprocess.run([loaded_data["idp_path"], "-h"], capture_output=True, text=True, check=True)
-            output = result.stdout.strip()
-
-            if "idp [options] [filename [filename [...]]]" in output.lower():
-                print(f"Command '{loaded_data["idp_path"]}' is valid.")
-                return loaded_data["idp_path"] 
-        except subprocess.CalledProcessError:
-            print(f"Command '{loaded_data["idp_path"]}' failed to execute.")
-
-    
-    """Check if any of the OS-specific commands exist and return the first one found."""
-    commands = {
-        "Windows": ["wsl idp", "idp"],
-        "Linux": ["idp", "/opt/idp3/resources/app/idp3/bin/idp", "/usr/local/bin/idp"],
-        "Darwin": ["idp", "/Applications/idp3-ide.app/Contents/Resources/app/idp3/bin/idp"]
-    }
-
     system = platform.system()
     possible_commands = commands.get(system, [])
-
+    
+    if loaded_data["idp_path"]:
+        possible_commands.insert(0, loaded_data["idp_path"])
+        
     for cmd in possible_commands:
-        print("Checing command from the preset commands: (" + cmd + ")")
+        print("Checing commands from the confing and the preset: (" + cmd + ")")
         try:
-            result = subprocess.run([cmd, "-h"], capture_output=True, text=True, check=True)
+            cmd_list = shlex.split(cmd)
+            cmd_list.append("-h")
+            result = subprocess.run(cmd_list, capture_output=True, text=True, check=True)
             output = result.stdout.strip()
 
             if "idp [options] [filename [filename [...]]]" in output.lower():
