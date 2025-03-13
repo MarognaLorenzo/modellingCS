@@ -123,7 +123,8 @@ class SetHandler(SimpleHTTPRequestHandler):
 
         try:
             cmd_list = shlex.split(self.idp_command)
-            cmd_list.extend(["-e", "checkIfSet()", "--nowarnings", "./idp/set1/set.idp"])
+            function = "checkIfSet\(\)" if platform.system() == "Windows" else "checkIfSet()"
+            cmd_list.extend(["-e", function, "--nowarnings", "./idp/set1/set.idp"])
             result = subprocess.run(cmd_list, capture_output=True, text=True, check=True, timeout=self.timeout_limit)
 
             output = result.stdout.strip()
@@ -167,7 +168,8 @@ class SetHandler(SimpleHTTPRequestHandler):
 
         try:
             cmd_list = shlex.split(self.idp_command)
-            cmd_list.extend(["-e", "findSetsOnTable()", "--nowarnings", "./idp/set1/set.idp"])
+            function = "findSetsOnTable\(\)" if platform.system() == "Windows" else "findSetsOnTable()"
+            cmd_list.extend(["-e", function, "--nowarnings", "./idp/set1/set.idp"])
             result = subprocess.run(cmd_list, capture_output=True, text=True, check=True, timeout=self.timeout_limit)
             output = result.stdout.strip()
 
@@ -205,7 +207,8 @@ class SetHandler(SimpleHTTPRequestHandler):
 
         try:
             cmd_list = shlex.split(self.idp_command)
-            cmd_list.extend(["-e", "areThereSetsOnTheTable()", "--nowarnings", "./idp/set1/set.idp"])
+            function = "areThereSetsOnTheTable\(\)" if platform.system() == "Windows" else "areThereSetsOnTheTable()"
+            cmd_list.extend(["-e", function, "--nowarnings", "./idp/set1/set.idp"])
             result = subprocess.run(cmd_list, capture_output=True, text=True, check=True, timeout=self.timeout_limit)
 
             output = result.stdout.strip()
@@ -250,11 +253,15 @@ class SetHandler(SimpleHTTPRequestHandler):
 
         try:
             cmd_list = shlex.split(self.idp_command)
-            cmd_list.extend(["-e", "writeTheHelpVoc()", "--nowarnings", "./vocabulary-util.idp"])
+            function = "writeTheHelpVoc\(\)" if platform.system() == "Windows" else "writeTheHelpVoc()"
+
+            cmd_list.extend(["-e", function, "--nowarnings", "./vocabulary-util.idp"])
             subprocess.run(cmd_list, cwd="./idp/set2", capture_output=True, text=True, check=True)
 
             cmd_list = shlex.split(self.idp_command)
-            cmd_list.extend(["-e", inference+"()", "--nowarnings", "./idp/set2/set.idp"])
+            function = "\(\)" if platform.system() == "Windows" else "()"
+
+            cmd_list.extend(["-e", inference+function, "--nowarnings", "./idp/set2/set.idp"])
             result = subprocess.run(cmd_list, capture_output=True, text=True, check=True)
 
             output = result.stdout.strip()
