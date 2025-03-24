@@ -10,11 +10,13 @@ vocabulary V_base_extended {
     // This type is constructed by all 4 property types of cards.
     // Use the same names for constructors as the names of the types (i.e., Number, Shape, ...).
     // TEMPLATE: type Prop constructed from { <Fill here> }
+    type Prop constructed from {Number, Shape, Shade, Color}
 	
     
     // TODO (warmup)
     // Declare a new function "cardsProp".
     // For a given Card and (Prop)erty it returns a Value.
+    cardsProp(Card, Prop) : Value
     
 }
 
@@ -26,8 +28,10 @@ theory T_base : V_base_extended {
     // It is important do define this function correctly!
     // Use a definition! 
     // HINT: You can quantify over cards in two ways (in this example P is a predicate over Cards):
-    // 	1) ! c[Card] : P(c). 
-    //	2) ! n[Number] s[Shape] d[Shade] c[Color] : P(c(n, s, d, c)). 
+    //! c[Card] : ! p[Prop] : ? elem[Value] : cardsProp(c, p) = elem.
+	! n[Number] s[Shape] d[Shade] co[Color] : cardsProp(c(n,s,d,co), Number) = n  & cardsProp(c(n,s,d,co), Shape) = s  & cardsProp(c(n,s,d,co), Shade) = d  & cardsProp(c(n,s,d,co), Color) = co.
+    
+    //! n[Number] s[Shape] d[Shade] c[Color] : P(c(n, s, d, c)). 
     //	The second way is possible because Card is a constructed type (see Base voc line 20)!
     {
         
