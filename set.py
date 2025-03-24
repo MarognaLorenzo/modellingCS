@@ -289,8 +289,8 @@ class SetHandler(SimpleHTTPRequestHandler):
         zip_name = query_params.get("zipname", ["files.zip"])[0]
 
         file_names = []
-        # Convert CSV list of files into an array
-        if part == "part":
+        # Populate the list of files based on the part
+        if part == "one":
             file_names = ["./idp/set1/base-theory.idp", "./idp/set1/selected-theory.idp", "./idp/set1/table-theory.idp"]
         else:
             # TO DO: add files for the part 2
