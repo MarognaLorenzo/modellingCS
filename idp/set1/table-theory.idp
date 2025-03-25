@@ -44,5 +44,5 @@ theory T_table_has_set : V_table_extra {
     
     // TODO
     // Express a constraint that there is a set on the table.
-    
+    ?c1[Card] : ?c2[Card]: ?c3[Card] : setsOnTable(c1, c2, c3).
 }
