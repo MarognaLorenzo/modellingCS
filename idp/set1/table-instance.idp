@@ -1,4 +1,8 @@
 structure S_table : V_table_extra {
   table = {
+    c("Three","Oval","Full","Blue"); c("Three","Oval","Full","Green"); c("Two","Squiggle","Full","Blue");
+    c("One","Diamond","Empty","Green"); c("Two","Diamond","Empty","Red"); c("Two","Oval","Full","Green");
+    c("Three","Oval","Full","Red"); c("One","Squiggle","Full","Green"); c("Two","Oval","Empty","Red");
+    c("Three","Diamond","Stripes","Green"); c("One","Oval","Stripes","Blue"); c("One","Squiggle","Empty","Red");
   }
 }

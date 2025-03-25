@@ -30,8 +30,9 @@ theory T_base : V_base_extended {
     // HINT: You can quantify over cards in two ways (in this example P is a predicate over Cards):
     //! c[Card] : ! p[Prop] : ? elem[Value] : cardsProp(c, p) = elem.
 	! n[Number] s[Shape] d[Shade] co[Color] : cardsProp(c(n,s,d,co), Number) = n  & cardsProp(c(n,s,d,co), Shape) = s  & cardsProp(c(n,s,d,co), Shade) = d  & cardsProp(c(n,s,d,co), Color) = co.
-    
-    //! n[Number] s[Shape] d[Shade] c[Color] : P(c(n, s, d, c)). 
+
+    // 	1) ! c[Card] : P(c). 
+    //	2) ! n[Number] s[Shape] d[Shade] c[Color] : P(c(n, s, d, c)). 
     //	The second way is possible because Card is a constructed type (see Base voc line 20)!
     {
         
