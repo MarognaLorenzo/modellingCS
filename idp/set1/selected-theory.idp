@@ -22,13 +22,13 @@ theory T_selected : V_selected_extra {
     // TODO:
     // All "sets" are composed of exactly 3 cards
     // Predicate selected contains exactly 3 cards
-    #{c[Card]: selected(c)} = 3.
-    
+    #{c[Card]: selected(c)} = 3. 
     
     // TODO:
     // Express constraint for selected cards to form a "set".
     // I.e., per property all values are same or different.
     // Recall we reified properties so you can quantify over them
+    !c1[Card]: !c2[Card]: !c3[Card]: (selected(c1) & selected(c2) & selected(c3) & c1 ~= c2 & c2 ~= c3 & c1 ~= c3) => (!p[Prop]: ((cardsProp(c1,p) = cardsProp(c2,p) & cardsProp(c1,p) = cardsProp(c3,p))| (cardsProp(c1,p) ~= cardsProp(c2,p) & cardsProp(c1,p) ~= cardsProp(c3,p) & cardsProp(c2,p) ~= cardsProp(c3,p)))).
     
     //for every card what could possibly lead to a set
     //using properties what possible properties could lead to a set

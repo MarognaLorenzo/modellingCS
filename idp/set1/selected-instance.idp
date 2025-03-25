@@ -1,2 +1,3 @@
 structure S_selected : V_selected_extra {
+  selected = { c("Three","Diamond","Full","Red"); c("Three","Squiggle","Stripes","Green"); c("Three","Oval","Empty","Blue"); }
 }
