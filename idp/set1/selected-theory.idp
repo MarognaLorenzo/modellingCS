@@ -9,6 +9,9 @@ vocabulary V_selected {
 vocabulary V_selected_extra {
 	extern vocabulary V_selected
     // If needed introduce new predicate/function symbols here.
+    sameProp(Card,Card,Prop) // 2 cards have the same property and are both selected
+    different2(Card,Card) // 2 cards are different and selected
+    different3(Card,Card,Card) // 3 cards are different and selected
 
 }
 
@@ -18,6 +21,13 @@ vocabulary V_selected_extra {
 theory T_selected : V_selected_extra {
     // NOTE: Theory T_base will be included in this theory; 
     // So, you can use function cardsProp!
+    {    
+    sameProp(c1,c2,p) <- (cardsProp(c1,p) = cardsProp(c2, p) & c1 ~= c2).
+    }
+    {
+        different2(c1, c2) <- c1 ~= c2 & selected(c1) & selected(c2).
+    	different3(c1,c2,c3) <- different2(c1,c2) & different2(c2,c3) & different2(c1,c3).
+     }
     
     // TODO:
     // All "sets" are composed of exactly 3 cards
@@ -28,10 +38,15 @@ theory T_selected : V_selected_extra {
     // Express constraint for selected cards to form a "set".
     // I.e., per property all values are same or different.
     // Recall we reified properties so you can quantify over them
-    !c1[Card]: !c2[Card]: !c3[Card]: (selected(c1) & selected(c2) & selected(c3) & c1 ~= c2 & c2 ~= c3 & c1 ~= c3) => (!p[Prop]: ((cardsProp(c1,p) = cardsProp(c2,p) & cardsProp(c1,p) = cardsProp(c3,p))| (cardsProp(c1,p) ~= cardsProp(c2,p) & cardsProp(c1,p) ~= cardsProp(c3,p) & cardsProp(c2,p) ~= cardsProp(c3,p)))).
     
-    //for every card what could possibly lead to a set
-    //using properties what possible properties could lead to a set
-    //symmetric
+    !p[Prop]: !c[Card]: selected(c) => 
+    (
+     (
+      ?otherCard[Card]: different2(c, otherCard) & sameProp(c, otherCard, p)
+     ) => 
+     (
+      !anyOtherCard[Card]: different3(c,otherCard,anyOtherCard)=> sameProp(anyOtherCard,c,p)
+     )
+    ).
     
 }
